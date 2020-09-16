@@ -19,8 +19,12 @@ exports.postAddProduct = (req, res, next) => { // only will receive post request
     const price = req.body.price;
     const description = req.body.description;
     const products = new Product(null, title, imageUrl, price, description);
-    products.save();
-    res.redirect('/');
+    products
+        .save()
+        .then(() => {
+            res.redirect('/');
+        })
+        .catch(err => console.log(err));
 };
 
 exports.getEditProduct = (req, res, next) => {
@@ -29,17 +33,17 @@ exports.getEditProduct = (req, res, next) => {
         return res.redirect('/');
     }
     const prodId = req.params.productId;
-    Product.findById(prodId, product => {
-        if (!product) {
-            return res.redirect('/');
-        }
-        res.render('admin/edit-product', {
-            product: product,
-            pageTitle: 'Edit Product',
-            path: '/edit-product',
-            editing: editMode
+    Product.findById(prodId)
+        .then(([row, fieldData]) => {
+            res.render('admin/edit-product', {
+                product: row,
+                pageTitle: 'Edit Product',
+                path: '/edit-product',
+                editing: editMode
+            })
         })
-    });
+        .catch(err => console.log(err));
+
 };
 
 exports.postEditProduct = (req, res, next) => {
