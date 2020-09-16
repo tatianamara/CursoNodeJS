@@ -6,7 +6,7 @@ const expressHbs = require('express-handlebars');
 
 const controller404 = require('./controllers/404');
 
-const app = express();
+const app = express(); 
 
 //app.engine('hbs', expressHbs({ layoutsDir: 'views/layouts/', defaultLayout: 'main-layout.hbs' }));
 // seting the default template engine
