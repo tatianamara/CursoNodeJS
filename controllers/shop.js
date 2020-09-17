@@ -2,39 +2,45 @@ const Product = require('../models/product');
 const Cart = require("../models/cart");
 
 exports.getProducts = (req, res, next) => { //this path works like route from React, will recognize every path with "/"
-    Product.fetchAll(products => {
-        res.render('shop/product-list', {
-            prods: products,
-            pageTitle: 'All Products',
-            path: '/products',
-            hasProducts: products.length > 0
-            // code for handlebars template
-            /*productCSS: true,
-            activeShop: true*/
-        }) //we don't need to construct the path, because we set as default in app.js
-    });
+    Product.findAll()
+        .then(products => {
+            res.render('shop/product-list', {
+                prods: products,
+                pageTitle: 'All Products',
+                path: '/products',
+                hasProducts: products.length > 0
+                // code for handlebars template
+                /*productCSS: true,
+                activeShop: true*/
+            }) //we don't need to construct the path, because we set as default in app.js
+        })
+        .catch(err => console.log(err));
 };
 
 exports.getProduct = (req, res, next) => {
     const prodId = req.params.productId;
-    Product.findById(prodId, product => {
+    Product.findByPk(prodId)
+    .then(product => {
         res.render('shop/product-details', {
             product: product,
-            pageTitle: 'product.title',
+            pageTitle: product.title,
             path: '/products'
         })
-    });
+    })
+    .catch(err => console.log(err));
 };
 
 exports.getIndex = (req, res, next) => {
-    Product.fetchAll(products => {
-        res.render('shop/index', {
-            prods: products,
-            pageTitle: 'Shop',
-            path: '/',
-            hasProducts: products.length > 0
+    Product.findAll()
+        .then(products => {
+            res.render('shop/index', {
+                prods: products,
+                pageTitle: 'Shop',
+                path: '/',
+                hasProducts: products.length > 0
+            })
         })
-    });
+        .catch(err => console.log(err));
 };
 
 exports.getCart = (req, res, next) => {
