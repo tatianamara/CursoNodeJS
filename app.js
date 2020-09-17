@@ -25,18 +25,38 @@ const { userInfo } = require('os');
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.use((req, res, next) => {
+    User.findByPk(1)
+        .then(user => {
+            req.user = user;
+            next();
+        })
+        .catch(err => console.log(err));
+});
+
 app.use('/admin', adminRoutes);
 app.use(shopRoutes);
 
 app.use(controller404.get404);
 
-Product.belongsTo(User, {constraints: true, onDelete: 'CASCADE'});
+Product.belongsTo(User, { constraints: true, onDelete: 'CASCADE' });
 User.hasMany(Product);
 
 sequelize // create your tables base on the modules define
-    .sync({ force: true}) 
+    //.sync({ force: true})  it is a way to force the sequelize recreate all tables
+    .sync()
     .then(result => {
-        //console.log(result);
+        return User.findByPk(1);
+        //console.log(result);        
+    })
+    .then(user => {
+        if (!user) {
+            return User.create({ name: 'Tati', email: 'test@test.com' });
+        }
+        return user;
+    })
+    .then(user => {
+        //console.log(user);
         app.listen(3000);
     })
     .catch(err => {
