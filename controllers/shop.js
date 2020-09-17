@@ -44,22 +44,19 @@ exports.getIndex = (req, res, next) => {
 };
 
 exports.getCart = (req, res, next) => {
-    Cart.getProducts(cart => {
-        Product.fetchAll(products => {
-            const cartProducts = [];
-            for (product of products) {
-                const cartProductData = cart.products.find(prod => prod.id === product.id);
-                if (cartProductData) {
-                    cartProducts.push({ productData: product, qty: cartProductData.qty });
-                }
-            }
+    req.user
+        .getCart()
+        .then(cart => {
+            return cart.getProducts();
+        })
+        .then(products => {
             res.render('shop/cart', {
                 pageTitle: 'Your Cart',
                 path: '/cart',
-                products: cartProducts
+                products: products
             });
         })
-    });
+        .catch(err => console.log(err));
 };
 
 exports.postCart = (req, res, next) => { // only will receive post requests 
