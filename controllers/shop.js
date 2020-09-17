@@ -1,5 +1,4 @@
 const Product = require('../models/product');
-const Cart = require("../models/cart");
 
 exports.getProducts = (req, res, next) => { //this path works like route from React, will recognize every path with "/"
     Product.findAll()
@@ -73,7 +72,7 @@ exports.postCart = (req, res, next) => { // only will receive post requests
             let product;
             if (products.length > 0) {
                 product = products[0];
-            }            
+            }
             if (product) {
                 const oldQuantity = product.cartItem.quantity;
                 newQuantity = oldQuantity + 1;
@@ -94,17 +93,47 @@ exports.postCart = (req, res, next) => { // only will receive post requests
 
 exports.postCartDeleteProduct = (req, res, next) => {
     const prodId = req.body.productId;
+    req.user
+        .getCart()
+        .then(cart => {
+            return cart.getProducts({ where: { id: prodId } });
+        })
+        .then(products => {
+            const product = products[0];
+            return product.cartItem.destroy();
+        })
+        .then(result => {
+            res.redirect('/cart');
+        })
+        .catch(err => console.log(err));
+};
+
+exports.postOrder = (req, res, next) => {
+    let fetchedCart;
   req.user
     .getCart()
     .then(cart => {
-      return cart.getProducts({ where: { id: prodId } });
+      fetchedCart = cart;
+      return cart.getProducts();
     })
     .then(products => {
-      const product = products[0];
-      return product.cartItem.destroy();
+      return req.user
+        .createOrder()
+        .then(order => {
+          return order.addProducts(
+            products.map(product => {
+              product.orderItem = { quantity: product.cartItem.quantity };
+              return product;
+            })
+          );
+        })
+        .catch(err => console.log(err));
     })
     .then(result => {
-      res.redirect('/cart');
+      return fetchedCart.setProducts(null);
+    })
+    .then(result => {
+      res.redirect('/orders');
     })
     .catch(err => console.log(err));
 };
