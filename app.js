@@ -6,6 +6,8 @@ const expressHbs = require('express-handlebars');
 
 const controller404 = require('./controllers/404');
 const sequelize = require('./util/database');
+const Product = require('./models/product');
+const User = require('./models/user');
 
 const app = express();
 
@@ -18,6 +20,7 @@ app.set('views', 'views');
 
 const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
+const { userInfo } = require('os');
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
@@ -27,8 +30,11 @@ app.use(shopRoutes);
 
 app.use(controller404.get404);
 
+Product.belongsTo(User, {constraints: true, onDelete: 'CASCADE'});
+User.hasMany(Product);
+
 sequelize // create your tables base on the modules define
-    .sync() 
+    .sync({ force: true}) 
     .then(result => {
         //console.log(result);
         app.listen(3000);
