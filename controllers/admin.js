@@ -39,18 +39,18 @@ exports.getEditProduct = (req, res, next) => {
     }
     const prodId = req.params.productId;
     Product.findByPk(prodId)
-    .then(product => {
-        if (!product) {
-            return res.redirect('/');
-        }
-        res.render('admin/edit-product', {
-            product: product,
-            pageTitle: 'Edit Product',
-            path: '/edit-product',
-            editing: editMode
+        .then(product => {
+            if (!product) {
+                return res.redirect('/');
+            }
+            res.render('admin/edit-product', {
+                product: product,
+                pageTitle: 'Edit Product',
+                path: '/edit-product',
+                editing: editMode
+            })
         })
-    })
-    .catch(err => console.log(err));
+        .catch(err => console.log(err));
 };
 
 exports.postEditProduct = (req, res, next) => {
@@ -59,9 +59,18 @@ exports.postEditProduct = (req, res, next) => {
     const imageUrl = req.body.imageUrl;
     const price = req.body.price;
     const description = req.body.description;
-    const products = new Product(prodId, title, imageUrl, price, description);
-    products.save();
-    res.redirect('/admin/products');
+    Product.findByPk(prodId)
+        .then(product => {
+            product.title = title;
+            product.price = price;
+            product.description = description;
+            product.imageUrl = imageUrl;
+            return product.save();
+        })
+        .then(result => {
+            res.redirect('/admin/products');
+        }) // this then block handle with any success from product.save
+        .catch(err => console.log(err)); // this catch block handle with any error from both .then
 }
 
 exports.getProducts = (req, res, next) => {
