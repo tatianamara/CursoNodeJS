@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const expressHbs = require('express-handlebars');
 
 const controller404 = require('./controllers/404');
+const sequelize = require('./util/database');
 
 const app = express();
 
@@ -26,4 +27,12 @@ app.use(shopRoutes);
 
 app.use(controller404.get404);
 
-app.listen(3000);
+sequelize // create your tables base on the modules define
+    .sync() 
+    .then(result => {
+        //console.log(result);
+        app.listen(3000);
+    })
+    .catch(err => {
+        console.log(err);
+    });
