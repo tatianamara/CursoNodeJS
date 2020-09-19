@@ -6,7 +6,7 @@ const expressHbs = require('express-handlebars');
 
 const controller404 = require('./controllers/404');
 
-const mongoConnect = require('./util/database');
+const mongoConnect = require('./util/database').mongoConnect;
 
 const app = express();
 
@@ -31,6 +31,7 @@ app.use((req, res, next) => {
     //         next();
     //     })
     //     .catch(err => console.log(err));
+    next();
 });
 
 app.use('/admin', adminRoutes);
