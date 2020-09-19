@@ -1,4 +1,7 @@
+const mongodb = require('mongodb');
 const Product = require('../models/product');
+
+const ObjectId = mongodb.ObjectId;
 
 exports.getAddProduct = (req, res, next) => {
     //res.sendFile(path.join(rootDir, 'views', 'add-product.html'));
@@ -53,22 +56,25 @@ exports.getEditProduct = (req, res, next) => {
 
 exports.postEditProduct = (req, res, next) => {
     const prodId = req.body.productId;
-    const title = req.body.title;
-    const imageUrl = req.body.imageUrl;
-    const price = req.body.price;
-    const description = req.body.description;
-    Product.findById(prodId)
-        .then(product => {
-            product.title = title;
-            product.price = price;
-            product.description = description;
-            product.imageUrl = imageUrl;
-            return product.save();
-        })
-        .then(result => {
-            res.redirect('/admin/products');
-        }) // this then block handle with any success from product.save
-        .catch(err => console.log(err)); // this catch block handle with any error from both .then
+  const updatedTitle = req.body.title;
+  const updatedPrice = req.body.price;
+  const updatedImageUrl = req.body.imageUrl;
+  const updatedDesc = req.body.description;
+
+  const product = new Product(
+    updatedTitle,
+    updatedPrice,
+    updatedDesc,
+    updatedImageUrl,
+    new ObjectId(prodId)
+  );
+  product
+    .save()
+    .then(result => {
+      console.log('UPDATED PRODUCT!');
+      res.redirect('/admin/products');
+    })
+    .catch(err => console.log(err));
 }
 
 exports.getProducts = (req, res, next) => {
