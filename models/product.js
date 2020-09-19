@@ -10,9 +10,11 @@ class Product {
 
     save() {
         const db = getDb();
-        db.collection('product')
+        return db.collection('product')
             .insertOne(this)
-            .then()
+            .then(result => {
+                console.log(result);
+            })
             .catch(err => console.log(err));
     }
 }
