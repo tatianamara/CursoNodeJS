@@ -1,4 +1,7 @@
+const mongodb = require('mongodb');
 const Product = require('../models/product');
+
+const ObjectId = mongodb.ObjectId;
 
 exports.getAddProduct = (req, res, next) => {
     //res.sendFile(path.join(rootDir, 'views', 'add-product.html'));
@@ -18,13 +21,9 @@ exports.postAddProduct = (req, res, next) => { // only will receive post request
     const imageUrl = req.body.imageUrl;
     const price = req.body.price;
     const description = req.body.description;
-    req.user
-        .createProduct({
-            title: title,
-            price: price,
-            description: description,
-            imageUrl: imageUrl
-        })
+    const product = new Product(title, price, description, imageUrl, null, req.user._id);
+    product
+        .save()
         .then(result => {
             console.log('Created Product');
             res.redirect('/admin/products');
@@ -40,10 +39,8 @@ exports.getEditProduct = (req, res, next) => {
         return res.redirect('/');
     }
     const prodId = req.params.productId;
-    req.user
-        .getProducts({ where: { id: prodId } })
-        .then(products => {
-            const product = products[0];
+    Product.findById(prodId)
+        .then(product => {
             if (!product) {
                 return res.redirect('/');
             }
@@ -59,27 +56,29 @@ exports.getEditProduct = (req, res, next) => {
 
 exports.postEditProduct = (req, res, next) => {
     const prodId = req.body.productId;
-    const title = req.body.title;
-    const imageUrl = req.body.imageUrl;
-    const price = req.body.price;
-    const description = req.body.description;
-    Product.findByPk(prodId)
-        .then(product => {
-            product.title = title;
-            product.price = price;
-            product.description = description;
-            product.imageUrl = imageUrl;
-            return product.save();
-        })
-        .then(result => {
-            res.redirect('/admin/products');
-        }) // this then block handle with any success from product.save
-        .catch(err => console.log(err)); // this catch block handle with any error from both .then
+  const updatedTitle = req.body.title;
+  const updatedPrice = req.body.price;
+  const updatedImageUrl = req.body.imageUrl;
+  const updatedDesc = req.body.description;
+
+  const product = new Product(
+    updatedTitle,
+    updatedPrice,
+    updatedDesc,
+    updatedImageUrl,
+    new ObjectId(prodId)
+  );
+  product
+    .save()
+    .then(result => {
+      console.log('UPDATED PRODUCT!');
+      res.redirect('/admin/products');
+    })
+    .catch(err => console.log(err));
 }
 
 exports.getProducts = (req, res, next) => {
-    req.user
-        .getProducts()
+    Product.fetchAll()
         .then(products => {
             res.render('admin/products', {
                 prods: products,
@@ -93,11 +92,8 @@ exports.getProducts = (req, res, next) => {
 
 exports.postDeleteProduct = (req, res, next) => {
     const prodId = req.body.productId;
-    Product.findByPk(prodId)
-        .then(product => {
-            return product.destroy();
-        })
-        .then(result => {
+    Product.deleteById(prodId)
+        .then(() => {
             console.log('DESTROYED PRODUCT');
             res.redirect('/admin/products');
         })
