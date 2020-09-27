@@ -21,9 +21,14 @@ exports.postAddProduct = (req, res, next) => { // only will receive post request
     const imageUrl = req.body.imageUrl;
     const price = req.body.price;
     const description = req.body.description;
-    const product = new Product(title, price, description, imageUrl, null, req.user._id);
+    const product = new Product({
+        title: title,
+        price: price,
+        description: description,
+        imageUrl: imageUrl
+    });
     product
-        .save()
+        .save() // this method is from mongoose
         .then(result => {
             console.log('Created Product');
             res.redirect('/admin/products');
@@ -56,25 +61,25 @@ exports.getEditProduct = (req, res, next) => {
 
 exports.postEditProduct = (req, res, next) => {
     const prodId = req.body.productId;
-  const updatedTitle = req.body.title;
-  const updatedPrice = req.body.price;
-  const updatedImageUrl = req.body.imageUrl;
-  const updatedDesc = req.body.description;
+    const updatedTitle = req.body.title;
+    const updatedPrice = req.body.price;
+    const updatedImageUrl = req.body.imageUrl;
+    const updatedDesc = req.body.description;
 
-  const product = new Product(
-    updatedTitle,
-    updatedPrice,
-    updatedDesc,
-    updatedImageUrl,
-    new ObjectId(prodId)
-  );
-  product
-    .save()
-    .then(result => {
-      console.log('UPDATED PRODUCT!');
-      res.redirect('/admin/products');
-    })
-    .catch(err => console.log(err));
+    const product = new Product(
+        updatedTitle,
+        updatedPrice,
+        updatedDesc,
+        updatedImageUrl,
+        new ObjectId(prodId)
+    );
+    product
+        .save()
+        .then(result => {
+            console.log('UPDATED PRODUCT!');
+            res.redirect('/admin/products');
+        })
+        .catch(err => console.log(err));
 }
 
 exports.getProducts = (req, res, next) => {
