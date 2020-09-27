@@ -4,9 +4,10 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const expressHbs = require('express-handlebars');
 
+const mongoose = require('mongoose');
+
 const controller404 = require('./controllers/404');
 
-const mongoConnect = require('./util/database').mongoConnect;
 const User = require('./models/user');
 
 const app = express();
@@ -39,6 +40,10 @@ app.use(shopRoutes);
 
 app.use(controller404.get404);
 
-mongoConnect(() => {
-    app.listen(3000);
-});
+mongoose.connect('mongodb+srv://mongo_tatiana:<password>@cluster0.1y1dx.mongodb.net/shop?retryWrites=true&w=majority')
+    .then(() => {
+        app.listen(3000);
+    })
+    .catch(err => {
+        console.log(err);
+    });
