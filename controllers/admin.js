@@ -25,7 +25,8 @@ exports.postAddProduct = (req, res, next) => { // only will receive post request
         title: title,
         price: price,
         description: description,
-        imageUrl: imageUrl
+        imageUrl: imageUrl,
+        userId: req.user // with mongoose you can pass all user object and it will collect the _id from the object
     });
     product
         .save() // this method is from mongoose
@@ -83,7 +84,11 @@ exports.postEditProduct = (req, res, next) => {
 
 exports.getProducts = (req, res, next) => {
     Product.find()
+        // .select('title price -_id') // you can select the fields you wanna retrive and with "-" you can explicit say that you don't wanna retrive the _id
+        // .populate('userId', 'name') // mongoose will retrive all information related to the userId 
+        // with populate, the second parameter is the select function
         .then(products => {
+            console.log(products);
             res.render('admin/products', {
                 prods: products,
                 pageTitle: 'Admin Products',
