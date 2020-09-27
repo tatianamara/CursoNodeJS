@@ -1,7 +1,7 @@
 const Product = require('../models/product');
 
 exports.getProducts = (req, res, next) => { //this path works like route from React, will recognize every path with "/"
-    Product.fetchAll()
+    Product.find() // retrieve all products automatic
         .then(products => {
             res.render('shop/product-list', {
                 prods: products,
@@ -18,7 +18,7 @@ exports.getProducts = (req, res, next) => { //this path works like route from Re
 
 exports.getProduct = (req, res, next) => {
     const prodId = req.params.productId;
-    Product.findById(prodId)
+    Product.findById(prodId) // Method define by mongoose
         .then(product => {
             res.render('shop/product-details', {
                 product: product,
@@ -30,7 +30,7 @@ exports.getProduct = (req, res, next) => {
 };
 
 exports.getIndex = (req, res, next) => {
-    Product.fetchAll()
+    Product.find()
         .then(products => {
             res.render('shop/index', {
                 prods: products,
