@@ -11,7 +11,8 @@ exports.getAddProduct = (req, res, next) => {
         editing: false,
         productCSS: true,
         formsCSS: true,
-        activeAddProduct: true
+        activeAddProduct: true,
+        isAuthenticated: req.isLoggedIn
     });
     //next(); // Allows the request to continue to the next middleware in line
 };
@@ -54,7 +55,8 @@ exports.getEditProduct = (req, res, next) => {
                 product: product,
                 pageTitle: 'Edit Product',
                 path: '/edit-product',
-                editing: editMode
+                editing: editMode,
+                isAuthenticated: req.isLoggedIn
             })
         })
         .catch(err => console.log(err));
@@ -93,7 +95,8 @@ exports.getProducts = (req, res, next) => {
                 prods: products,
                 pageTitle: 'Admin Products',
                 path: '/admin/products',
-                hasProducts: products.length > 0
+                hasProducts: products.length > 0,
+                isAuthenticated: req.isLoggedIn
             })
         })
         .catch(err => console.log(err));

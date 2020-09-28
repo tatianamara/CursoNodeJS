@@ -8,7 +8,8 @@ exports.getProducts = (req, res, next) => { //this path works like route from Re
                 prods: products,
                 pageTitle: 'All Products',
                 path: '/products',
-                hasProducts: products.length > 0
+                hasProducts: products.length > 0,
+                isAuthenticated: req.isLoggedIn
                 // code for handlebars template
                 /*productCSS: true,
                 activeShop: true*/
@@ -24,7 +25,8 @@ exports.getProduct = (req, res, next) => {
             res.render('shop/product-details', {
                 product: product,
                 pageTitle: product.title,
-                path: '/products'
+                path: '/products',
+                isAuthenticated: req.isLoggedIn
             })
         })
         .catch(err => console.log(err));
@@ -37,7 +39,8 @@ exports.getIndex = (req, res, next) => {
                 prods: products,
                 pageTitle: 'Shop',
                 path: '/',
-                hasProducts: products.length > 0
+                hasProducts: products.length > 0,
+                isAuthenticated: req.isLoggedIn
             })
         })
         .catch(err => console.log(err));
@@ -52,7 +55,8 @@ exports.getCart = (req, res, next) => {
             res.render('shop/cart', {
                 pageTitle: 'Your Cart',
                 path: '/cart',
-                products: products
+                products: products,
+                isAuthenticated: req.isLoggedIn
             });
         })
         .catch(err => console.log(err));
@@ -110,7 +114,8 @@ exports.getOrders = (req, res, next) => {
             res.render('shop/orders', {
                 pageTitle: 'Your Orders',
                 path: '/orders',
-                orders: orders
+                orders: orders,
+                isAuthenticated: req.isLoggedIn
             });
         })
         .catch(err => console.log(err));
