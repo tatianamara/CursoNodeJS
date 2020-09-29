@@ -6,6 +6,7 @@ const expressHbs = require('express-handlebars');
 const mongoose = require('mongoose');
 const session = require('express-session');
 const MongoDBStore = require('connect-mongodb-session')(session);
+const csrf = require('csurf');
 
 const controller404 = require('./controllers/404');
 const User = require('./models/user');
@@ -17,6 +18,8 @@ const store = new MongoDBStore({
     uri: MONGODB_URI,
     collection: 'sessions'
 });
+
+const csrfProtection = csrf();
 
 //app.engine('hbs', expressHbs({ layoutsDir: 'views/layouts/', defaultLayout: 'main-layout.hbs' }));
 // seting the default template engine
@@ -42,6 +45,8 @@ app.use(
     })
 );
 
+app.use(csrfProtection);
+
 app.use((req, res, next) => {
     if (!req.session.user) {
         return next();
@@ -53,6 +58,12 @@ app.use((req, res, next) => {
         })
         .catch(err => console.log(err));
 })
+
+app.use((req, res, next) => {
+    res.locals.isAuthenticated = req.session.isLoggedIn;    
+    res.locals.csrfToken = req.csrfToken();
+    next();
+});
 
 app.use('/admin', adminRoutes);
 app.use(shopRoutes);
