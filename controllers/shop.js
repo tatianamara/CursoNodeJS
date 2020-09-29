@@ -8,8 +8,7 @@ exports.getProducts = (req, res, next) => { //this path works like route from Re
                 prods: products,
                 pageTitle: 'All Products',
                 path: '/products',
-                hasProducts: products.length > 0,
-                isAuthenticated: req.session.isLoggedIn
+                hasProducts: products.length > 0
                 // code for handlebars template
                 /*productCSS: true,
                 activeShop: true*/
@@ -25,8 +24,7 @@ exports.getProduct = (req, res, next) => {
             res.render('shop/product-details', {
                 product: product,
                 pageTitle: product.title,
-                path: '/products',
-                isAuthenticated: req.session.isLoggedIn
+                path: '/products'
             })
         })
         .catch(err => console.log(err));
@@ -54,8 +52,7 @@ exports.getCart = (req, res, next) => {
             res.render('shop/cart', {
                 pageTitle: 'Your Cart',
                 path: '/cart',
-                products: products,
-                isAuthenticated: req.session.isLoggedIn
+                products: products
             });
         })
         .catch(err => console.log(err));
@@ -91,7 +88,7 @@ exports.postOrder = (req, res, next) => {
             });
             const order = new Order({
                 user: {
-                    name: req.user.name,
+                    email: req.user.email,
                     userId: req.user
                 },
                 products: products
@@ -113,8 +110,7 @@ exports.getOrders = (req, res, next) => {
             res.render('shop/orders', {
                 pageTitle: 'Your Orders',
                 path: '/orders',
-                orders: orders,
-                isAuthenticated: req.session.isLoggedIn
+                orders: orders
             });
         })
         .catch(err => console.log(err));
