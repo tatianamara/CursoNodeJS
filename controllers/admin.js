@@ -21,11 +21,11 @@ exports.getAddProduct = (req, res, next) => {
 
 exports.postAddProduct = (req, res, next) => { // only will receive post requests 
     const title = req.body.title;
-    const imageUrl = req.body.imageUrl;
+    const imageUrl = req.file;
     const price = req.body.price;
     const description = req.body.description;
     const errors = validationResult(req);
-
+    console.log(imageUrl);
     if (!errors.isEmpty()) {
         return res.status(422).render('admin/edit-product', {
             pageTitle: 'Add Product',
@@ -72,7 +72,6 @@ exports.postAddProduct = (req, res, next) => { // only will receive post request
             //     validationErrors: []
             // });
             //res.redirect('/500');
-
             const error = new Error(err);
             error.httpStatusCode = 500;
             return next(error); // passing a error in next function will activated the error handling middleware from express js
