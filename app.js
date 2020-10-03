@@ -33,6 +33,18 @@ const fileStorage = multer.diskStorage({
     }
 });
 
+const fileFilter = (req, file, cb) => {
+    if (
+        file.mimetype === 'image/png' ||
+        file.mimetype === 'image/jpg' ||
+        file.mimetype === 'image/jpeg'
+    ) {
+        cb(null, true);
+    } else {
+        cb(null, false);
+    }
+};
+
 //app.engine('hbs', expressHbs({ layoutsDir: 'views/layouts/', defaultLayout: 'main-layout.hbs' }));
 // seting the default template engine
 //app.set('view engine', 'hbs'); // this allows to use the handlebars package to work with dynamic html
@@ -47,7 +59,7 @@ const authRoutes = require('./routes/auth');
 const { userInfo } = require('os');
 
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(multer({ storage: fileStorage }).single('image')) // you need pass the name of the field that contains binary data
+app.use(multer({ storage: fileStorage, fileFilter: fileFilter }).single('image')) // you need pass the name of the field that contains binary data
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(
     session({
