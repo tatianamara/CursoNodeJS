@@ -3,6 +3,7 @@ const fileHelper = require('../util/file');
 
 const Product = require('../models/product');
 
+const ITEMS_PER_PAGE = 1;
 
 exports.getAddProduct = (req, res, next) => {
     //res.sendFile(path.join(rootDir, 'views', 'add-product.html'));
@@ -176,16 +177,31 @@ exports.postEditProduct = (req, res, next) => {
 }
 
 exports.getProducts = (req, res, next) => {
+    const page = + req.query.page || 1;
+    let totalItems;
+
     Product.find({ userId: req.user._id })
         // .select('title price -_id') // you can select the fields you wanna retrive and with "-" you can explicit say that you don't wanna retrive the _id
         // .populate('userId', 'name') // mongoose will retrive all information related to the userId 
         // with populate, the second parameter is the select function
+        .countDocuments()
+        .then(numProducts => {
+            totalItems = numProducts;
+            return Product.find({ userId: req.user._id })
+                .skip((page - 1) * ITEMS_PER_PAGE) // defines how many items we should skip acording the page
+                .limit(ITEMS_PER_PAGE); // limits the count of items per page
+        })
         .then(products => {
-            console.log(products);
             res.render('admin/products', {
                 prods: products,
                 pageTitle: 'Admin Products',
                 path: '/admin/products',
+                currentPage: page,
+                hasNextPage: ITEMS_PER_PAGE * page < totalItems,
+                hasPreviousPage: page > 1,
+                nextPage: page + 1,
+                previousPage: page - 1,
+                lastPage: Math.ceil(totalItems / ITEMS_PER_PAGE),
                 hasProducts: products.length > 0
             })
         })

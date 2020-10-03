@@ -6,18 +6,34 @@ const PDFDocument = require('pdfkit');
 const Product = require('../models/product');
 const Order = require('../models/order');
 
+const ITEMS_PER_PAGE = 1;
+
 exports.getProducts = (req, res, next) => { //this path works like route from React, will recognize every path with "/"
-    Product.find() // retrieve all products automatic
+    const page = + req.query.page || 1;
+    let totalItems;
+
+    Product.find()
+        .countDocuments()
+        .then(numProducts => {
+            totalItems = numProducts;
+            return Product.find()
+                .skip((page - 1) * ITEMS_PER_PAGE) // defines how many items we should skip acording the page
+                .limit(ITEMS_PER_PAGE); // limits the count of items per page
+
+        })
         .then(products => {
             res.render('shop/product-list', {
                 prods: products,
-                pageTitle: 'All Products',
+                pageTitle: 'Products',
                 path: '/products',
+                currentPage: page,
+                hasNextPage: ITEMS_PER_PAGE * page < totalItems,
+                hasPreviousPage: page > 1,
+                nextPage: page + 1,
+                previousPage: page - 1,
+                lastPage: Math.ceil(totalItems / ITEMS_PER_PAGE),
                 hasProducts: products.length > 0
-                // code for handlebars template
-                /*productCSS: true,
-                activeShop: true*/
-            }) //we don't need to construct the path, because we set as default in app.js
+            })
         })
         .catch(err => {
             const error = new Error(err);
@@ -44,12 +60,29 @@ exports.getProduct = (req, res, next) => {
 };
 
 exports.getIndex = (req, res, next) => {
+    const page = + req.query.page || 1;
+    let totalItems;
+
     Product.find()
+        .countDocuments()
+        .then(numProducts => {
+            totalItems = numProducts;
+            return Product.find()
+                .skip((page - 1) * ITEMS_PER_PAGE) // defines how many items we should skip acording the page
+                .limit(ITEMS_PER_PAGE); // limits the count of items per page
+
+        })
         .then(products => {
             res.render('shop/index', {
                 prods: products,
                 pageTitle: 'Shop',
                 path: '/',
+                currentPage: page,
+                hasNextPage: ITEMS_PER_PAGE * page < totalItems,
+                hasPreviousPage: page > 1,
+                nextPage: page + 1,
+                previousPage: page - 1,
+                lastPage: Math.ceil(totalItems / ITEMS_PER_PAGE),
                 hasProducts: products.length > 0
             })
         })
@@ -175,26 +208,26 @@ exports.getInvoice = (req, res, next) => {
 
             pdfDoc.fontSize(26).text('Invoice', {
                 underline: true
-              });
-              pdfDoc.text('-----------------------');
-              let totalPrice = 0;
-              order.products.forEach(prod => {
+            });
+            pdfDoc.text('-----------------------');
+            let totalPrice = 0;
+            order.products.forEach(prod => {
                 totalPrice += prod.quantity * prod.product.price;
                 pdfDoc
-                  .fontSize(14)
-                  .text(
-                    prod.product.title +
-                      ' - ' +
-                      prod.quantity +
-                      ' x ' +
-                      '$' +
-                      prod.product.price
-                  );
-              });
-              pdfDoc.text('---');
-              pdfDoc.fontSize(20).text('Total Price: $' + totalPrice);
+                    .fontSize(14)
+                    .text(
+                        prod.product.title +
+                        ' - ' +
+                        prod.quantity +
+                        ' x ' +
+                        '$' +
+                        prod.product.price
+                    );
+            });
+            pdfDoc.text('---');
+            pdfDoc.fontSize(20).text('Total Price: $' + totalPrice);
 
-              pdfDoc.end();
+            pdfDoc.end();
             // fs.readFile(invoicePath, (err, data) => {
             //     if (err) {
             //         return next(err);
