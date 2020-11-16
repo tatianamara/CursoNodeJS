@@ -1,4 +1,5 @@
 const path = require('path');
+const fs = require('fs');
 
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -10,11 +11,14 @@ const csrf = require('csurf');
 const flash = require('connect-flash');
 const multer = require('multer');
 const { v4: uuidv4 } = require('uuid');
+const helmet = require('helmet');
+const compression = require('compression');
+const morgan = require('morgan');
 
 const errorController = require('./controllers/error');
 const User = require('./models/user');
 
-const MONGODB_URI = 'mongodb+srv://mongo_tatiana:<password>@cluster0.1y1dx.mongodb.net/shop';
+const MONGODB_URI = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@cluster0.1y1dx.mongodb.net/${process.env.MONGO_DATABASE}`;
 
 const app = express();
 const store = new MongoDBStore({
@@ -56,7 +60,14 @@ const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
 const authRoutes = require('./routes/auth');
 
-const { userInfo } = require('os');
+const accessLogStream = fs.createWriteStream(
+    path.join(__dirname, 'access.log'),
+    { flags: 'a' }
+);
+
+app.use(helmet()); // used for secure response headers
+app.use(compression()); // used for compress assets
+app.use(morgan('combined', { stream: accessLogStream })); // used for request logging
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(multer({ storage: fileStorage, fileFilter: fileFilter }).single('image')) // you need pass the name of the field that contains binary data
@@ -119,7 +130,7 @@ app.use((error, req, res, next) => {
 
 mongoose.connect(MONGODB_URI)
     .then(result => {
-        app.listen(3000);
+        app.listen(process.env.PORT || 3000);
     })
     .catch(err => {
         console.log(err);
